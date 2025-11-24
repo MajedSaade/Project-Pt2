@@ -16,7 +16,7 @@ console.log('API Key appears to be configured');
 
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-export const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
 
 // Test function to verify API connection
 export const testApiConnection = async () => {
