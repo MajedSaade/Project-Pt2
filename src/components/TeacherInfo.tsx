@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import backgroundImage from './pics/smsm.jpg';
 
 interface TeacherData {
@@ -24,7 +23,6 @@ const TeacherInfo: React.FC = () => {
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
   const [filteredSubjects, setFilteredSubjects] = useState<string[]>([]);
 
-  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -185,7 +183,7 @@ const TeacherInfo: React.FC = () => {
   // Initialize filtered subjects on component mount
   React.useEffect(() => {
     filterSubjects('');
-  }, []);
+  });
 
   return (
     <div style={styles.container} dir="rtl">
