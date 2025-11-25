@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { db } from '../config/firebase';
+import { db, storage } from '../config/firebase';
 import { collection, addDoc } from 'firebase/firestore';
+import { ref, uploadString } from 'firebase/storage';
 
 interface SurveyAnswers {
   overallExperience: number;
@@ -44,11 +45,24 @@ const Survey: React.FC = () => {
         data.userId = currentUser.uid;
       }
 
+      // Save to Firestore Database
       const docRef = await addDoc(collection(db, 'sessions'), data);
-      console.log('Document written with ID: ', docRef.id);
+      console.log('✅ Document written to Firestore with ID: ', docRef.id);
+
+      // Also save to Firebase Storage as JSON file
+      if (currentUser) {
+        const chatData = JSON.stringify(data, null, 2);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const fileName = `sessions/${currentUser.uid}/session_${timestamp}.json`;
+        const storageRef = ref(storage, fileName);
+
+        await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
+        console.log('✅ Session JSON saved to Storage: ', fileName);
+      }
+
       return true;
     } catch (e) {
-      console.error('Error adding document: ', e);
+      console.error('Error saving session: ', e);
       return false;
     }
   };
