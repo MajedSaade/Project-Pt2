@@ -8,6 +8,7 @@ import CourseSelection from './components/CourseSelection';
 import Register from './components/Register';
 import Chat from './components/Chat';
 import Survey from './components/Survey';
+import FirebaseTest from './components/FirebaseTest';
 
 function App() {
   return (
@@ -17,31 +18,39 @@ function App() {
           <Routes>
             {/* Default route redirects to welcome */}
             <Route path="/" element={<Navigate to="/welcome" />} />
-            
+
             {/* Public routes */}
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/teacher-info" element={<TeacherInfo />} />
             <Route path="/course-selection" element={<CourseSelection />} />
             <Route path="/register" element={<Register />} />
-            
+
             {/* Protected routes */}
-            <Route 
-              path="/chat" 
+            <Route
+              path="/chat"
               element={
                 <ProtectedRoute>
                   <Chat />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/survey" 
+            <Route
+              path="/survey"
               element={
                 <ProtectedRoute>
                   <Survey />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+            <Route
+              path="/firebase-test"
+              element={
+                <ProtectedRoute>
+                  <FirebaseTest />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Catch all route */}
             <Route path="*" element={<Navigate to="/welcome" />} />
           </Routes>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import avatarImage from './pics/avatar.png';
@@ -8,18 +8,15 @@ const Welcome: React.FC = () => {
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { currentUser, loginAnonymously } = useAuth();
+  const { loginAnonymously } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (currentUser) {
-      navigate('/teacher-info');
-    }
-  }, [currentUser, navigate]);
+  // Removed auto-redirect - always show welcome page first
+  // Users will navigate to teacher-info after submitting their name
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) return;
 
     try {
@@ -27,6 +24,8 @@ const Welcome: React.FC = () => {
       // Login anonymously and store the name in localStorage for later use
       await loginAnonymously();
       localStorage.setItem('userName', name.trim());
+      // Navigate to teacher info page after successful login
+      navigate('/teacher-info');
     } catch (error) {
       console.error('Failed to proceed:', error);
       setLoading(false);
@@ -41,9 +40,9 @@ const Welcome: React.FC = () => {
         </div>
         <h1 style={styles.title}>ברוכים הבאים!</h1>
         <p style={styles.subtitle}>
-        הזן את שמך כדי להתחיל לדבר עם עוזר המלצות הקורסים שלנו.
+          הזן את שמך כדי להתחיל לדבר עם עוזר המלצות הקורסים שלנו.
         </p>
-        
+
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
             <label style={styles.label}>השם שלך:</label>
@@ -57,10 +56,10 @@ const Welcome: React.FC = () => {
               disabled={loading}
             />
           </div>
-          
-          <button 
-            disabled={loading || !name.trim()} 
-            type="submit" 
+
+          <button
+            disabled={loading || !name.trim()}
+            type="submit"
             style={{
               ...styles.button,
               opacity: (!name.trim() || loading) ? 0.6 : 1,
