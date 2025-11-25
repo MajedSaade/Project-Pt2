@@ -5,6 +5,8 @@ import { generateCourseRecommendation } from '../config/gemini';
 import { ChatMessage, TeacherProfile } from '../types/User';
 import chatBackgroundImage from './pics/GBG1.png';
 import avatarImage from './pics/avatar.png';
+import { storage } from '../config/firebase';
+import { ref, uploadString } from 'firebase/storage';
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -16,7 +18,7 @@ const Chat: React.FC = () => {
   const navigate = useNavigate();
 
   const [isHovered, setIsHovered] = useState(false);
-  
+
   // Session timer state
   const [sessionTime, setSessionTime] = useState(0);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -99,7 +101,7 @@ const Chat: React.FC = () => {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!inputMessage.trim() || loading || !currentUser) return;
 
     const userMessage: ChatMessage = {
@@ -116,7 +118,7 @@ const Chat: React.FC = () => {
     try {
       const userName = localStorage.getItem('userName') || 'User';
       const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
-      
+
       const teacherProfile: TeacherProfile = {
         name: userName,
         subjectArea: teacherInfo.subjectArea || teacherInfo.subjectAreas?.join(', ') || '',
@@ -137,9 +139,9 @@ const Chat: React.FC = () => {
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error details:', error);
-      
+
       let errorMessage = 'Sorry, I encountered an error while processing your request. Please try again.';
-      
+
       // Provide more specific error messages
       if (error instanceof Error) {
         if (error.message.includes('API key')) {
@@ -150,7 +152,7 @@ const Chat: React.FC = () => {
           errorMessage = 'שגיאת רשת. אנא בדוק את החיבור לאינטרנט ונסה שוב.';
         }
       }
-      
+
       const errorMessageObj: ChatMessage = {
         id: (Date.now() + 1).toString(),
         content: errorMessage,
@@ -168,12 +170,30 @@ const Chat: React.FC = () => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
-    
+
     // Save session time before navigating
     localStorage.setItem('sessionTime', sessionTime.toString());
-    
+
     // Navigate to survey page
     navigate('/survey');
+  };
+
+  const saveChatToFirebase = async () => {
+    if (!currentUser) return;
+
+    try {
+      const chatData = JSON.stringify(messages, null, 2);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileName = `chats/${currentUser.uid}/chat_${timestamp}.json`;
+      const storageRef = ref(storage, fileName);
+
+      await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
+
+      alert('השיחה נשמרה בהצלחה!');
+    } catch (error) {
+      console.error('Error saving chat:', error);
+      alert('שגיאה בשמירת השיחה. אנא נסה שוב.');
+    }
   };
 
   if (!currentUser) {
@@ -194,6 +214,9 @@ const Chat: React.FC = () => {
             <span style={styles.timerValue}>{formatTime(sessionTime)}</span>
             <span style={styles.timerLabel}>:זמן שיחה</span>
           </div>
+          <button onClick={saveChatToFirebase} style={styles.saveButton}>
+            שמור שיחה
+          </button>
           <button onClick={handleEndSession} style={styles.endSessionButton}>
             סיים שיחה
           </button>
@@ -224,7 +247,7 @@ const Chat: React.FC = () => {
               </div>
             </div>
           )}
-          
+
           {messages.map((message) => (
             <div
               key={message.id}
@@ -236,9 +259,9 @@ const Chat: React.FC = () => {
               }}
             >
               {!message.isUser && (
-                <img 
-                  src={avatarImage} 
-                  alt="AI Assistant" 
+                <img
+                  src={avatarImage}
+                  alt="AI Assistant"
                   style={styles.avatar}
                 />
               )}
@@ -252,20 +275,20 @@ const Chat: React.FC = () => {
               >
                 <div style={styles.messageContent}>{message.content}</div>
                 <div style={styles.timestamp}>
-                  {message.timestamp.toLocaleTimeString([], { 
-                    hour: '2-digit', 
-                    minute: '2-digit' 
+                  {message.timestamp.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })}
                 </div>
               </div>
             </div>
           ))}
-          
+
           {loading && (
             <div style={{ ...styles.messageWrapper, justifyContent: 'flex-start', alignItems: 'flex-end', gap: '8px' }}>
-              <img 
-                src={avatarImage} 
-                alt="AI Assistant" 
+              <img
+                src={avatarImage}
+                alt="AI Assistant"
                 style={styles.avatar}
               />
               <div style={{ ...styles.message, backgroundColor: '#f1f1f1' }}>
@@ -289,8 +312,8 @@ const Chat: React.FC = () => {
             style={styles.input}
             disabled={loading}
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading || !inputMessage.trim()}
             style={{
               ...styles.sendButton,
@@ -393,16 +416,31 @@ const styles = {
     transition: 'all 0.2s ease-in-out',
     boxShadow: '0 2px 6px rgba(65, 105, 225, 0.2)',
   },
+  saveButton: {
+    backgroundImage: 'linear-gradient(to right, #28a745)',
+    color: 'white',
+    border: 'none',
+    padding: '12px 24px',
+    borderRadius: '10px',
+    fontSize: '15px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 0.2s ease-in-out',
+    boxShadow: '0 2px 6px rgba(40, 167, 69, 0.2)',
+  },
   chatContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column' as const,
     backgroundImage: `url(${chatBackgroundImage})`,
     backgroundSize: 'cover',
-    backgroundRepeat: 'repeat', 
+    backgroundRepeat: 'repeat',
     backgroundPosition: 'center',
-    backgroundAttachment: 'fixed', 
-    backdropFilter: 'blur(2px)', 
+    backgroundAttachment: 'fixed',
+    backdropFilter: 'blur(2px)',
     paddingTop: '120px',
     paddingBottom: '100px',
     overflow: 'hidden'
