@@ -6,7 +6,7 @@ import { ChatMessage, TeacherProfile } from '../types/User';
 import chatBackgroundImage from './pics/GBG1.png';
 import avatarImage from './pics/avatar.png';
 import { storage } from '../config/firebase';
-import { ref, uploadString } from 'firebase/storage';
+import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -188,8 +188,17 @@ const Chat: React.FC = () => {
       const storageRef = ref(storage, fileName);
 
       await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
+      const downloadURL = await getDownloadURL(storageRef);
 
-      alert('השיחה נשמרה בהצלחה!');
+      const linkMessage: ChatMessage = {
+        id: Date.now().toString(),
+        content: `השיחה נשמרה בהצלחה!\nניתן להוריד את הקובץ בקישור הבא:\n${downloadURL}`,
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, linkMessage]);
+
+      alert('השיחה נשמרה בהצלחה! הקישור נוסף לצ\'אט.');
     } catch (error) {
       console.error('Error saving chat:', error);
       alert('שגיאה בשמירת השיחה. אנא נסה שוב.');
