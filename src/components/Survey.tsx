@@ -1,37 +1,30 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { db } from '../config/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 interface SurveyAnswers {
   overallExperience: number;
   responseQuality: number;
   helpfulness: number;
   accuracy: number;
-  clarity: number;
   easeOfUse: number;
-  responseSpeed: number;
-  design: number;
-  personalization: number;
-  futureUse: number;
   wouldRecommend: string;
 }
 
 const Survey: React.FC = () => {
-  const { logout } = useAuth();
+  const { logout, currentUser } = useAuth();
   const navigate = useNavigate();
   const [answers, setAnswers] = useState<SurveyAnswers>({
     overallExperience: 0,
     responseQuality: 0,
     helpfulness: 0,
     accuracy: 0,
-    clarity: 0,
     easeOfUse: 0,
-    responseSpeed: 0,
-    design: 0,
-    personalization: 0,
-    futureUse: 0,
     wouldRecommend: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isFormComplete = () => {
     return (
@@ -39,41 +32,55 @@ const Survey: React.FC = () => {
       answers.responseQuality > 0 &&
       answers.helpfulness > 0 &&
       answers.accuracy > 0 &&
-      answers.clarity > 0 &&
       answers.easeOfUse > 0 &&
-      answers.responseSpeed > 0 &&
-      answers.design > 0 &&
-      answers.personalization > 0 &&
-      answers.futureUse > 0 &&
       answers.wouldRecommend !== ''
     );
   };
 
+  const saveSessionToFirebase = async (data: any) => {
+    try {
+      // Add user ID if available
+      if (currentUser) {
+        data.userId = currentUser.uid;
+      }
+
+      const docRef = await addDoc(collection(db, 'sessions'), data);
+      console.log('Document written with ID: ', docRef.id);
+      return true;
+    } catch (e) {
+      console.error('Error adding document: ', e);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFormComplete()) {
       alert('נא למלא את כל השאלות לפני המשך');
       return;
     }
-    
+
+    setIsSubmitting(true);
+
     // Get all session data from localStorage
     const userName = localStorage.getItem('userName');
     const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
     const courseRatings = JSON.parse(localStorage.getItem('courseRatings') || '[]');
     const sessionTime = localStorage.getItem('sessionTime');
     const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-    
+
     // Get current date and time
     const now = new Date();
     const sessionDate = now.toLocaleDateString('he-IL');
     const sessionDateTime = now.toLocaleString('he-IL');
-    
+
     // Create complete session data structure
     const sessionData = {
       sessionDate: sessionDate,
       sessionTime: sessionTime || '00:00:00',
       sessionDateTime: sessionDateTime,
+      timestamp: now, // specific timestamp for sorting
       userInfo: {
         userName: userName,
         teacherInfo: teacherInfo,
@@ -85,36 +92,16 @@ const Survey: React.FC = () => {
         completedAt: sessionDateTime
       }
     };
-    
-    // Convert to JSON string
-    const jsonData = JSON.stringify(sessionData, null, 2);
-    
-    // Try to save to server first
-    try {
-      console.log('Attempting to save session to server...');
-      const response = await fetch('/api/save-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonData,
-      });
-      
-      console.log('Server response status:', response.status);
-      const result = await response.json();
-      console.log('Server response:', result);
-      
-      if (result.success) {
-        console.log('✅ Session saved to server:', result.filename);
-        alert('השאלון נשמר בהצלחה!');
-      } else {
-        console.error('Server returned success=false:', result);
-        throw new Error('Server save failed');
-      }
-    } catch (error) {
-      console.error('Failed to save to server, will download locally:', error);
-      
-      // Fallback: Download the file locally if server is not available
+
+    // Save to Firestore
+    const success = await saveSessionToFirebase(sessionData);
+
+    if (success) {
+      alert('השאלון והשיחה נשמרו בהצלחה!');
+    } else {
+      alert('שגיאה בשמירת הנתונים. מוריד עותק מקומי...');
+      // Fallback: Download the file locally
+      const jsonData = JSON.stringify(sessionData, null, 2);
       const blob = new Blob([jsonData], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -125,11 +112,6 @@ const Survey: React.FC = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     }
-    
-    // Also save to localStorage for backup
-    const existingSessions = JSON.parse(localStorage.getItem('sessionResults') || '[]');
-    existingSessions.push(sessionData);
-    localStorage.setItem('sessionResults', JSON.stringify(existingSessions));
 
     // Clear user session data
     localStorage.removeItem('userName');
@@ -138,29 +120,33 @@ const Survey: React.FC = () => {
     localStorage.removeItem('sessionTime');
     localStorage.removeItem('chatHistory');
 
+    setIsSubmitting(false);
+
     // Logout and redirect
     await logout();
     navigate('/login');
   };
 
   const handleSkip = async () => {
+    setIsSubmitting(true);
     // Get all session data from localStorage
     const userName = localStorage.getItem('userName');
     const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
     const courseRatings = JSON.parse(localStorage.getItem('courseRatings') || '[]');
     const sessionTime = localStorage.getItem('sessionTime');
     const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-    
+
     // Get current date and time
     const now = new Date();
     const sessionDate = now.toLocaleDateString('he-IL');
     const sessionDateTime = now.toLocaleString('he-IL');
-    
+
     // Create session data without survey
     const sessionData = {
       sessionDate: sessionDate,
       sessionTime: sessionTime || '00:00:00',
       sessionDateTime: sessionDateTime,
+      timestamp: now,
       userInfo: {
         userName: userName,
         teacherInfo: teacherInfo,
@@ -172,46 +158,18 @@ const Survey: React.FC = () => {
         skippedAt: sessionDateTime
       }
     };
-    
-    // Convert to JSON string
-    const jsonData = JSON.stringify(sessionData, null, 2);
-    
-    // Try to save to server first
-    try {
-      console.log('Attempting to save skipped session to server...');
-      const response = await fetch('/api/save-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: jsonData,
-      });
-      
-      const result = await response.json();
-      if (result.success) {
-        console.log('✅ Skipped session saved to server:', result.filename);
-      }
-    } catch (error) {
-      console.error('Failed to save skipped session to server:', error);
-      
-      // Fallback: Download the file locally if server is not available
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `session_${userName}_${now.getTime()}_skipped.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }
-    
+
+    // Save to Firestore
+    await saveSessionToFirebase(sessionData);
+
     // Clear user session data
     localStorage.removeItem('userName');
     localStorage.removeItem('teacherInfo');
     localStorage.removeItem('courseRatings');
     localStorage.removeItem('sessionTime');
     localStorage.removeItem('chatHistory');
+
+    setIsSubmitting(false);
 
     // Logout and redirect
     await logout();
@@ -254,7 +212,7 @@ const Survey: React.FC = () => {
           {/* Question 1: Satisfaction */}
           <div style={styles.question}>
             <label style={styles.label}>1. עד כמה את/ה מרוצה מהחוויה הכוללת בצ'אט?</label>
-            {renderStars(answers.overallExperience, (val) => 
+            {renderStars(answers.overallExperience, (val) =>
               setAnswers({ ...answers, overallExperience: val })
             )}
           </div>
@@ -262,7 +220,7 @@ const Survey: React.FC = () => {
           {/* Question 2: Helpfulness */}
           <div style={styles.question}>
             <label style={styles.label}>2. עד כמה היית מרוצה מאיכות התשובות של הצ'אט?</label>
-            {renderStars(answers.responseQuality, (val) => 
+            {renderStars(answers.responseQuality, (val) =>
               setAnswers({ ...answers, responseQuality: val })
             )}
           </div>
@@ -270,64 +228,24 @@ const Survey: React.FC = () => {
           {/* Question 3: Ease of Use */}
           <div style={styles.question}>
             <label style={styles.label}>3. עד כמה התשובות עזרו לך להבין או לפתור את מה שחיפשת?</label>
-            {renderStars(answers.helpfulness, (val) => 
+            {renderStars(answers.helpfulness, (val) =>
               setAnswers({ ...answers, helpfulness: val })
             )}
           </div>
 
-          {/* Question 3: Ease of Use */}
+          {/* Question 4: Accuracy */}
           <div style={styles.question}>
             <label style={styles.label}>4. עד כמה המידע שהצ'אט סיפק היה מדויק בעיניך?</label>
-            {renderStars(answers.accuracy, (val) => 
+            {renderStars(answers.accuracy, (val) =>
               setAnswers({ ...answers, accuracy: val })
             )}
           </div>
 
-          {/* Question 3: Ease of Use */}
+          {/* Question 5: Ease of Use */}
           <div style={styles.question}>
-            <label style={styles.label}>5. עד כמה ההסברים היו ברורים וקלים להבנה?</label>
-            {renderStars(answers.clarity, (val) => 
-              setAnswers({ ...answers, clarity: val })
-            )}
-          </div>   
-
-          {/* Question 3: Ease of Use */}
-          <div style={styles.question}>
-            <label style={styles.label}>6. עד כמה היה קל להשתמש בצ'אט?</label>
-            {renderStars(answers.easeOfUse, (val) => 
+            <label style={styles.label}>5. עד כמה היה קל להשתמש בצ'אט?</label>
+            {renderStars(answers.easeOfUse, (val) =>
               setAnswers({ ...answers, easeOfUse: val })
-            )}
-          </div>       
-
-          {/* Question 3: Ease of Use */}
-          <div style={styles.question}>
-            <label style={styles.label}>7. עד כמה היית מרוצה ממהירות התגובה של הצ'אט?</label>
-            {renderStars(answers.responseSpeed, (val) => 
-              setAnswers({ ...answers, responseSpeed: val })
-            )}
-          </div> 
-
-          {/* Question 3: Ease of Use */}
-          <div style={styles.question}>
-            <label style={styles.label}>8. עד כמה אהבת את העיצוב ונוחות השימוש בממשק הצ'אט?</label>
-            {renderStars(answers.design, (val) => 
-              setAnswers({ ...answers, design: val })
-            )}
-          </div>
-
-          {/* Question 3: Ease of Use */}
-          <div style={styles.question}>
-            <label style={styles.label}>9. עד כמה הצ'אט הרגיש מותאם אישית לצרכים שלך?</label>
-            {renderStars(answers.personalization, (val) => 
-              setAnswers({ ...answers, personalization: val })
-            )}
-          </div>
-
-          {/* Question 3: Ease of Use */}
-          <div style={styles.question}>
-            <label style={styles.label}>10. עד כמה את/ה צפוי/ה להשתמש בצ'אט שוב בעתיד?</label>
-            {renderStars(answers.futureUse, (val) => 
-              setAnswers({ ...answers, futureUse: val })
             )}
           </div>
 
@@ -373,19 +291,24 @@ const Survey: React.FC = () => {
 
           {/* Buttons */}
           <div style={styles.buttonGroup}>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               style={{
                 ...styles.submitButton,
-                opacity: isFormComplete() ? 1 : 0.6,
-                cursor: isFormComplete() ? 'pointer' : 'not-allowed'
+                opacity: isFormComplete() && !isSubmitting ? 1 : 0.6,
+                cursor: isFormComplete() && !isSubmitting ? 'pointer' : 'not-allowed'
               }}
-              disabled={!isFormComplete()}
+              disabled={!isFormComplete() || isSubmitting}
             >
-              שלח ויציאה
+              {isSubmitting ? 'שולח...' : 'שלח ויציאה'}
             </button>
-            <button type="button" onClick={handleSkip} style={styles.skipButton}>
-              דלג ויציאה
+            <button
+              type="button"
+              onClick={handleSkip}
+              style={styles.skipButton}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'שולח...' : 'דלג ויציאה'}
             </button>
           </div>
         </form>

@@ -5,8 +5,6 @@ import { generateCourseRecommendation } from '../config/gemini';
 import { ChatMessage, TeacherProfile } from '../types/User';
 import chatBackgroundImage from './pics/GBG1.png';
 import avatarImage from './pics/avatar.png';
-import { storage } from '../config/firebase';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 
 const Chat: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -178,33 +176,6 @@ const Chat: React.FC = () => {
     navigate('/survey');
   };
 
-  const saveChatToFirebase = async () => {
-    if (!currentUser) return;
-
-    try {
-      const chatData = JSON.stringify(messages, null, 2);
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const fileName = `chats/${currentUser.uid}/chat_${timestamp}.json`;
-      const storageRef = ref(storage, fileName);
-
-      await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
-      const downloadURL = await getDownloadURL(storageRef);
-
-      const linkMessage: ChatMessage = {
-        id: Date.now().toString(),
-        content: `השיחה נשמרה בהצלחה!\nניתן להוריד את הקובץ בקישור הבא:\n${downloadURL}`,
-        isUser: false,
-        timestamp: new Date()
-      };
-      setMessages(prev => [...prev, linkMessage]);
-
-      alert('השיחה נשמרה בהצלחה! הקישור נוסף לצ\'אט.');
-    } catch (error) {
-      console.error('Error saving chat:', error);
-      alert('שגיאה בשמירת השיחה. אנא נסה שוב.');
-    }
-  };
-
   if (!currentUser) {
     return <div>טוען...</div>;
   }
@@ -223,9 +194,6 @@ const Chat: React.FC = () => {
             <span style={styles.timerValue}>{formatTime(sessionTime)}</span>
             <span style={styles.timerLabel}>:זמן שיחה</span>
           </div>
-          <button onClick={saveChatToFirebase} style={styles.saveButton}>
-            שמור שיחה
-          </button>
           <button onClick={handleEndSession} style={styles.endSessionButton}>
             סיים שיחה
           </button>
