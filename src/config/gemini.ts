@@ -1,97 +1,207 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TeacherProfile } from '../types/User';
 
-// Get API key from environment variables
+// ============================
+// 🔐 Gemini API Initialization
+// ============================
+
 const API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
+console.log("🔑 Gemini API key prefix:", API_KEY?.slice(0, 4) + "..." + API_KEY?.slice(-3));
 
-console.log('API Key loaded:', API_KEY ? 'API Key present' : 'No API Key');
-console.log('API Key starts with:', API_KEY ? API_KEY.substring(0, 10) + '...' : 'N/A');
-
+console.log('API Key loaded:', API_KEY ? '✅ API Key present' : '❌ No API Key');
 if (!API_KEY || API_KEY === 'your-api-key-here') {
-  console.error('Gemini API key is not properly configured. Please check your .env file.');
   throw new Error('REACT_APP_GEMINI_API_KEY is not configured in environment variables');
 }
 
-console.log('API Key appears to be configured');
-
 const genAI = new GoogleGenerativeAI(API_KEY);
+export const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+// ============================
+// Conversation Context & Intent Handling
+// ============================
 
-export const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
+type ConversationState = "general" | "awaitingRecommendationConfirmation" | "recommendation";
 
-// Test function to verify API connection
+let conversationState: ConversationState = "general";
+let lastBotMessage: string | undefined = undefined;
+
+function detectIntent(message: string): "question" | "request_recommendation" | "confirmation" | "other" {
+  const msg = message.trim().toLowerCase();
+
+  const recommendationWords = ["עוד", "תמליץ", "המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
+  const confirmationWords = ["אא", "כן", "בטח", "קדימה", "יאללה", "כן בבקשה"];
+  const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסבר", "מה", "למה"];
+
+  if (recommendationWords.some(w => msg.includes(w))) return "request_recommendation";
+  if (confirmationWords.includes(msg)) return "confirmation";
+  if (questionWords.some(w => msg.includes(w))) return "question";
+  return "other";
+}
+
+// ============================
+//  Test API Connection
+// ============================
+
 export const testApiConnection = async () => {
   try {
-    console.log('Testing API connection...');
     const result = await model.generateContent('Hello, respond with "API working" in Hebrew');
-    const response = await result.response;
-    console.log('API test successful:', response.text());
-    return response.text();
+    return (await result.response).text();
   } catch (error) {
     console.error('API test failed:', error);
     throw error;
   }
 };
 
+// ============================
+//  Main Recommendation Logic
+// ============================
+
 export const generateCourseRecommendation = async (
   userMessage: string,
   teacherProfile: TeacherProfile
 ) => {
-  // Format previous courses for display
-  const previousCoursesText = teacherProfile.previousCourses && teacherProfile.previousCourses.length > 0 
-    ? teacherProfile.previousCourses.join(', ')
-    : 'לא צוינו קורסים קודמים';
-
-  const systemPrompt = `You are a course recommendation assistant for teachers. Please respond in Hebrew.
-  
-  פרופיל המורה:
-  - שם: ${teacherProfile.name}
-  - מקצוע הוראה: ${teacherProfile.subjectArea}
-  - מגזר: ${teacherProfile.schoolType}
-  - שפת בית הספר: ${teacherProfile.language}
-  - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText}
-
-  אתה צריך לספק המלצות קורסים מותאמות אישית והצעות חינוכיות על בסיס הפרופיל של המורה. היה מועיל, מקצועי, והתמקד בתוכן חינוכי שיועיל למורים בתחום ההוראה שלהם. 
-  
-  הנחיות חשובות:
-  1. קח בחשבון את הקורסים שהמורה כבר השתתף בהם כדי להמליץ על קורסים משלימים או מתקדמים יותר
-  2. הימנע מהמלצה על קורסים שהמורה כבר השתתף בהם, אלא אם כן מדובר בקורסי המשך או רמה מתקדמת
-  3. קח בחשבון את המגזר שבו המורה עובד כדי לתת המלצות רלוונטיות תרבותית
-  4. התמקד בקורסים שיתרמו לפיתוח המקצועי של המורה בתחום ההוראה שלו
-  
-  ענה בעברית, בצורה ברורה ומפורטת.
-
-  שאלת המורה: ${userMessage}`;
-
   try {
-    console.log('Sending request to Gemini API...');
-    console.log('Teacher Profile:', teacherProfile);
-    console.log('User Message:', userMessage);
-    
-    const result = await model.generateContent(systemPrompt);
-    const response = await result.response;
-    
-    console.log('Gemini API response received successfully');
-    return response.text();
-  } catch (error) {
-    console.error('Error generating response:', error);
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : 'No stack trace',
-      teacherProfile,
-      userMessage
-    });
+    const intent = detectIntent(userMessage);
+    const previousCoursesText =
+      teacherProfile.previousCourses && teacherProfile.previousCourses.length > 0
+        ? teacherProfile.previousCourses.join(', ')
+        : 'לא צוינו קורסים קודמים';
 
-    // Provide more specific error messages
-    if (error instanceof Error) {
-      if (error.message.includes('API key')) {
-        throw new Error('שגיאה במפתח API. אנא בדוק את ההגדרות.');
-      } else if (error.message.includes('quota') || error.message.includes('limit')) {
-        throw new Error('חריגה ממכסת השימוש ב-API. אנא נסה שוב מאוחר יותר.');
-      } else if (error.message.includes('network') || error.message.includes('fetch')) {
-        throw new Error('שגיאת רשת. אנא בדוק את החיבור לאינטרנט.');
+    console.log(`🧠 Intent Detected: ${intent}`);
+    console.log(`📍 Conversation State: ${conversationState}`);
+
+    // =====================================
+    // 🔥 NEW — Call your Render CatBoost API
+    // =====================================
+    const predictionResponse = await fetch(
+      "https://api-course-recommender.onrender.com/predict",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: teacherProfile.subjectArea,
+          sector: teacherProfile.schoolType,
+          language: teacherProfile.language,
+          teaches_elementary: teacherProfile.educationLevels?.includes("יסודי") ? 1 : 0,
+          teaches_secondary: teacherProfile.educationLevels?.includes("על יסודי") ? 1 : 0
+        }),
       }
+    );
+
+    const predictionData = await predictionResponse.json();
+
+    console.log("🔥 Top-5 model output:", predictionData);
+
+    // =====================================
+    // Build summary for Gemini
+    // =====================================
+    const coursesSummary = predictionData
+      .map((c: any, i: number) => `
+      ${i + 1}. שם הקורס: ${c["שם הקורס"]}
+        • תקציר הקורס: ${c["תקציר הקורס"]}
+        • ציון התאמה: ${(c.score * 100).toFixed(1)}%
+      `)
+      .join("\n");
+
+    console.log("📘 Courses Summary for prompt:", coursesSummary);
+
+    // =======================
+    // Case 1: Recommendation
+    // =======================
+
+    if (
+      intent === "request_recommendation" ||
+      (lastBotMessage && lastBotMessage.includes("מה אתה מחפש")) ||
+      (intent === "confirmation" && conversationState === "awaitingRecommendationConfirmation")
+    ) {
+      conversationState = "recommendation";
+      const systemPrompt =
+        `אתה עוזר חכם להמלצות קורסים למורים.  עליך לכתוב את התשובה בעברית בלבד, בשפה טבעית, מקצועית וברורה. 
+          
+          פרופיל המורה:
+          - שם: ${teacherProfile.name}
+          - מקצוע הוראה: ${teacherProfile.subjectArea}
+          - מגזר: ${teacherProfile.schoolType}
+          - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
+          - שפת בית הספר: ${teacherProfile.language}
+          - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText}
+          - שאלה: ${userMessage}
+
+          להלן הקורסים המתאימים ביותר לפי מודל החיזוי:
+          ${coursesSummary}
+
+          הנחיות:
+          1. תן המלצות מותאמות אישית למורה.
+          2. הסבר בשני משפטים למה כל קורס מתאים לפי תקציר הקורס והמידע על המורה.
+          3. כתיבה בעברית מקצועית וברורה.
+         4. הימנע מלהציע קורסים שהשם שלהם מופיע ב ${previousCoursesText}  
+        `;
+
+      console.log('📤 Sending recommendation prompt to Gemini...');
+      const result = await model.generateContent(systemPrompt);
+      const response = await result.response;
+      lastBotMessage = response.text();
+
+      return response.text().replace(/\*\*/g, '').replace(/\*/g, '');
     }
-    
+
+    // =======================
+    // Case 2: Question
+    // =======================
+    if (intent === "question") {
+      conversationState = "awaitingRecommendationConfirmation";
+
+      const questionPrompt = `
+      המשתמש שאל שאלה:
+      "${userMessage}"
+
+       בהנתן פרופיל המורה:
+      - שם: ${teacherProfile.name}
+      - מקצוע הוראה: ${teacherProfile.subjectArea}
+      - מגזר: ${teacherProfile.schoolType}
+      - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
+      - שפת בית הספר: ${teacherProfile.language}
+      - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText} 
+
+      ולהלן קורסים אפשריים הקשורים לשאלה:
+      ${coursesSummary}
+
+      ענה על השאלה בעברית מקצועית וברורה 
+      התשובה צריכה להיות ישירה , ללא הרחבות מיותרות וללא תיאורים כלליים.
+    התשובה צריכה להתבסס על פרופיל המורה ועל המידע לגבי הקורסים.  
+      `;
+
+      const questionResult = await model.generateContent(questionPrompt);
+      const response = await questionResult.response;
+
+      lastBotMessage = response.text();
+      return response.text().replace(/\*\*/g, '').replace(/\*/g, '');
+    }
+
+    // =======================
+    // Case 3: Confirmation
+    // =======================
+    if (intent === "confirmation" && lastBotMessage?.includes("האם תרצה שאמליץ")) {
+      conversationState = "recommendation";
+      lastBotMessage =
+        "מעולה! כדי שאוכל להתאים לך קורסים באמת רלוונטיים — תספר לי קצת מה אתה מחפש. מה היית רוצה לשפר או ללמוד בקורס?";
+      return lastBotMessage;
+    }
+
+    // =======================
+    // Case 4: General Chat
+    // =======================
+    conversationState = "general";
+    lastBotMessage =
+      "כדי שאוכל להמליץ לך בצורה מדויקת — ספר לי קצת מה אתה מחפש, מה מעניין אותך או במה היית רוצה להתפתח כמורה";
+    return lastBotMessage;
+
+  } catch (error) {
+    console.error('❌ Error generating response:', error);
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) throw new Error('שגיאה במפתח API. בדוק את ההגדרות.');
+      if (error.message.includes('quota')) throw new Error('חריגה ממכסת השימוש ב-API.');
+      if (error.message.includes('fetch')) throw new Error('שגיאת רשת. בדוק את החיבור.');
+    }
     throw new Error('נכשל ביצירת תגובה. אנא נסה שוב.');
   }
 };

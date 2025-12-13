@@ -19,7 +19,8 @@ export interface TeacherProfile {
   subjectArea: string;
   schoolType: string;
   language: string;
-  previousCourses?: string[];
+  educationLevels: string[];
+  previousCourses: string[];
 }
 
 export interface ChatMessage {
