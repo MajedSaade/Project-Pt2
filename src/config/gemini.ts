@@ -27,9 +27,9 @@ let lastBotMessage: string | undefined = undefined;
 function detectIntent(message: string): "question" | "request_recommendation" | "confirmation" | "other" {
   const msg = message.trim().toLowerCase();
 
-  const recommendationWords = ["עוד", "תמליץ", "המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
+  const recommendationWords = ["מתעניין","מתעניין","מתעניינת","עוד", "תמליץ", "מחפש","מחפשת","המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
   const confirmationWords = ["אא", "כן", "בטח", "קדימה", "יאללה", "כן בבקשה"];
-  const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסבר", "מה", "למה"];
+  const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסביר" , "תסבר", "מה", "למה"];
 
   if (recommendationWords.some(w => msg.includes(w))) return "request_recommendation";
   if (confirmationWords.includes(msg)) return "confirmation";
@@ -89,18 +89,36 @@ export const generateCourseRecommendation = async (
 
     const predictionData = await predictionResponse.json();
 
-    console.log("🔥 Top-5 model output:", predictionData);
-
     // =====================================
     // Build summary for Gemini
     // =====================================
+    // const coursesSummary = predictionData
+    //   .map((c: any, i: number) => `
+    //   ${i + 1}. שם הקורס: ${c["שם הקורס"]}
+    //     • תקציר הקורס: ${c["תקציר הקורס"]}
+    //     • ציון התאמה: ${(c.score * 100).toFixed(1)}%
+    //   `)
+    //   .join("\n");
     const coursesSummary = predictionData
-      .map((c: any, i: number) => `
-      ${i + 1}. שם הקורס: ${c["שם הקורס"]}
-        • תקציר הקורס: ${c["תקציר הקורס"]}
-        • ציון התאמה: ${(c.score * 100).toFixed(1)}%
+    .map((c: any, i: number) => `${i + 1} שם הקורס: ${c["שם הקורס"]}
+
+      פרטי הקורס:
+      • קטגוריה: ${c["קטגוריה"]}
+      • תחום: ${c["תחום"]}
+      • שלב חינוך: ${c["שלב חינוך"]}
+      • שפת הקורס: ${c["שפת הקורס"]}
+
+     מדדי עומס: 
+      • אחוז משלימים: ${c["אחוז משלימים"]}%
+      • מספר משימות חובה: ${c["מספר משימות חובה"]}
+
+      תקציר הקורס:
+      ${c["תקציר הקורס"]}
+
+      ציון התאמת הקורס למורה: ${(c.score * 100).toFixed(1)}%
       `)
-      .join("\n");
+        .join("\n");
+
 
     console.log("📘 Courses Summary for prompt:", coursesSummary);
 
@@ -128,12 +146,12 @@ export const generateCourseRecommendation = async (
 
           להלן הקורסים המתאימים ביותר לפי מודל החיזוי:
           ${coursesSummary}
-
+         
           הנחיות:
-          1. תן המלצות מותאמות אישית למורה.
-          2. הסבר בשני משפטים למה כל קורס מתאים לפי תקציר הקורס והמידע על המורה.
+          ${userMessage} 1. עליך לבחור 3–5 קורסים מתוך רשימת הקורסים המתאימים לפי בקשת המורהה 
+          2. תסביר בשני משפטים על כל קורס ולמה כל קורס מתאים לפי תקציר הקורס והמידע על המורה.
           3. כתיבה בעברית מקצועית וברורה.
-         4. הימנע מלהציע קורסים שהשם שלהם מופיע ב ${previousCoursesText}  
+         4. הימנע מלהציע קורסים שהשם שלהם מופיע ב-${previousCoursesText}  
         `;
 
       console.log('📤 Sending recommendation prompt to Gemini...');
@@ -150,25 +168,47 @@ export const generateCourseRecommendation = async (
     if (intent === "question") {
       conversationState = "awaitingRecommendationConfirmation";
 
-      const questionPrompt = `
-      המשתמש שאל שאלה:
+    //   const questionPrompt = `
+    //   המשתמש שאל שאלה:
+    //   "${userMessage}"
+
+    //    בהנתן פרופיל המורה:
+    //   - שם: ${teacherProfile.name}
+    //   - מקצוע הוראה: ${teacherProfile.subjectArea}
+    //   - מגזר: ${teacherProfile.schoolType}
+    //   - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
+    //   - שפת בית הספר: ${teacherProfile.language}
+    //   - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText} 
+
+    //   ולהלן מידע קורסים אפשריים הקשורים לשאלה:
+    //   ${coursesSummary}
+
+    //   ענה על השאלה בעברית מקצועית וברורה 
+    //   התשובה צריכה להיות ישירה , ללא הרחבות מיותרות וללא תיאורים כלליים.
+    // התשובה צריכה להתבסס על פרופיל המורה ועל המידע לגבי הקורסים.  
+    //   `;
+    const questionPrompt = `
+     אתה עוזר חכם להמלצת קורסים למורים וכבר המלצת עכשיו המורה כתב:
       "${userMessage}"
 
-       בהנתן פרופיל המורה:
-      - שם: ${teacherProfile.name}
-      - מקצוע הוראה: ${teacherProfile.subjectArea}
-      - מגזר: ${teacherProfile.schoolType}
-      - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
-      - שפת בית הספר: ${teacherProfile.language}
-      - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText} 
+      ברשותך מידע על המורה:
+        - שם: ${teacherProfile.name}
+        - מקצוע הוראה: ${teacherProfile.subjectArea}
+        - מגזר: ${teacherProfile.schoolType}
+        - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
+        - שפת בית הספר: ${teacherProfile.language}
+        - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText}
 
-      ולהלן קורסים אפשריים הקשורים לשאלה:
+      וברשותך מידע על קורסים רלוונטיים:
       ${coursesSummary}
 
-      ענה על השאלה בעברית מקצועית וברורה 
-      התשובה צריכה להיות ישירה , ללא הרחבות מיותרות וללא תיאורים כלליים.
-    התשובה צריכה להתבסס על פרופיל המורה ועל המידע לגבי הקורסים.  
+      הנחיות:
+      - ענה באופן ישיר על השאלה בשפה עברית טבעית, מקצועית וברורה.
+      - התייחס לשאלת המשתמש עצמה ונסה להבין למה הוא מתכוון.
+      -  התשובה צריכה להיות ישירה , ללא הרחבות מיותרות וללא תיאורים כלליים
+      - השתמש במידע על הקורסים ו/או בפרופיל המורה כדי לענות.
       `;
+
 
       const questionResult = await model.generateContent(questionPrompt);
       const response = await questionResult.response;
