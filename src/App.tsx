@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -11,6 +11,23 @@ import Survey from './components/Survey';
 import FirebaseTest from './components/FirebaseTest';
 
 function App() {
+  useEffect(() => {
+    if (!sessionStorage.getItem('ml_warmed')) {
+      fetch("https://api-course-recommender.onrender.com/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: "warmup",
+          sector: "warmup",
+          language: "warmup",
+          teaches_elementary: 0,
+          teaches_secondary: 0
+        })
+      }).catch(() => {});
+
+      sessionStorage.setItem('ml_warmed', 'true');
+    }
+  }, []);
   return (
     <Router>
       <AuthProvider>

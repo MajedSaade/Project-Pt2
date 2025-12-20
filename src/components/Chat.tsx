@@ -21,7 +21,7 @@ const Chat: React.FC = () => {
   const [sessionTime, setSessionTime] = useState(0);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-
+  
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -116,13 +116,15 @@ const Chat: React.FC = () => {
     try {
       const userName = localStorage.getItem('userName') || 'User';
       const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
-
+      const selectedCourses = JSON.parse(localStorage.getItem('selectedCourses') || '[]');
+      
       const teacherProfile: TeacherProfile = {
         name: userName,
         subjectArea: teacherInfo.subjectArea || teacherInfo.subjectAreas?.join(', ') || '',
         schoolType: teacherInfo.schoolType || '',
         language: teacherInfo.language || 'עברית',
-        previousCourses: []
+        educationLevels: teacherInfo.educationLevels,
+        previousCourses: selectedCourses
       };
 
       const response = await generateCourseRecommendation(inputMessage, teacherProfile);

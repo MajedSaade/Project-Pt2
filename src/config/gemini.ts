@@ -66,7 +66,6 @@ export const generateCourseRecommendation = async (
         ? teacherProfile.previousCourses.join(', ')
         : 'לא צוינו קורסים קודמים';
 
-    console.log(`🧠 Intent Detected: ${intent}`);
     console.log(`📍 Conversation State: ${conversationState}`);
 
     // =====================================
@@ -89,16 +88,6 @@ export const generateCourseRecommendation = async (
 
     const predictionData = await predictionResponse.json();
 
-    // =====================================
-    // Build summary for Gemini
-    // =====================================
-    // const coursesSummary = predictionData
-    //   .map((c: any, i: number) => `
-    //   ${i + 1}. שם הקורס: ${c["שם הקורס"]}
-    //     • תקציר הקורס: ${c["תקציר הקורס"]}
-    //     • ציון התאמה: ${(c.score * 100).toFixed(1)}%
-    //   `)
-    //   .join("\n");
     const coursesSummary = predictionData
     .map((c: any, i: number) => `${i + 1} שם הקורס: ${c["שם הקורס"]}
 
@@ -168,25 +157,6 @@ export const generateCourseRecommendation = async (
     if (intent === "question") {
       conversationState = "awaitingRecommendationConfirmation";
 
-    //   const questionPrompt = `
-    //   המשתמש שאל שאלה:
-    //   "${userMessage}"
-
-    //    בהנתן פרופיל המורה:
-    //   - שם: ${teacherProfile.name}
-    //   - מקצוע הוראה: ${teacherProfile.subjectArea}
-    //   - מגזר: ${teacherProfile.schoolType}
-    //   - שלב חינוך: ${teacherProfile.educationLevels?.join(", ") || "לא צויין"}.
-    //   - שפת בית הספר: ${teacherProfile.language}
-    //   - קורסים שהמורה השתתף בהם בעבר: ${previousCoursesText} 
-
-    //   ולהלן מידע קורסים אפשריים הקשורים לשאלה:
-    //   ${coursesSummary}
-
-    //   ענה על השאלה בעברית מקצועית וברורה 
-    //   התשובה צריכה להיות ישירה , ללא הרחבות מיותרות וללא תיאורים כלליים.
-    // התשובה צריכה להתבסס על פרופיל המורה ועל המידע לגבי הקורסים.  
-    //   `;
     const questionPrompt = `
      אתה עוזר חכם להמלצת קורסים למורים וכבר המלצת עכשיו המורה כתב:
       "${userMessage}"
