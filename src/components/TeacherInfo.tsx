@@ -9,7 +9,56 @@ interface TeacherData {
   educationLevels: string[];
   language: string;
 }
-
+  const predefinedSubjects = [
+  'אחר',
+  'מורה היסטוריה',
+  'מורה מקרא',
+  'מורה אנגלית',
+  'מורה בכיתה',
+  'מורה ערבית',
+  'מורה חינוך מיוחד',
+  'מורה חינוך גופני',
+  'מורה עברית',
+  'מורה מוזיקה',
+  'מורה גיאוגרפיה',
+  'מורה ספרות',
+  'מורה/רכז מופת',
+  'מורה תנ"ך',
+  'מורה מתמטיקה',
+  'מורה מדע וטכנולוגיה',
+  'רכז/ת היסטוריה',
+  'רכז/ת חינוך מיוחד',
+  'סגן/ית מנהל/ת',
+  'קלינאי תקשורת',
+  'מורה אמנות חזותית',
+  'מורה אזרחות',
+  'מורה מדעי הסביבה',
+  'רכז/ת תנ"ך',
+  'מורה חינוך לשוני',
+  'רכז/ת פדגוגי',
+  'מדריך/ת מתמטיקה',
+  'מנהל/ת תיכון',
+  'רכז/ת אנגלית',
+  'מורה שילוב',
+  'מדריך/ת מדע וטכנולוגיה',
+  'רכז/ת ספרות',
+  'מדריך/ת עברית',
+  'רכז/ת מדעי המחשב',
+  'רכז/ת עברית',
+  'משרד החינוך',
+  'רכז/ת גיל רך',
+  'רכז/ת מחשבים',
+  'מורה כימיה',
+  'רכז/ת חברתי',
+  'רכז/ת ערבית',
+  'רכז/ת אזרחות',
+  'מדריך/ת ערבית',
+  'מדריך/ת אמנות',
+  'מורה תיאטרון',
+  'מורה פיזיקה',
+  'מורה ביולוגיה',
+  'מורה תושב"ע'
+  ];
 const TeacherInfo: React.FC = () => {
   const [teacherData, setTeacherData] = useState<TeacherData>({
     name: '',
@@ -93,85 +142,6 @@ const TeacherInfo: React.FC = () => {
     'יהודי', "בדואי", "ערבי", "דרוזי", "צרקסי", "אחר"
   ];
 
-  const predefinedSubjects = [
-  'אחר',
-  'מורה היסטוריה',
-  'מורה מקרא',
-  'מורה אנגלית',
-  'מורה בכיתה',
-  'מורה ערבית',
-  'מורה חינוך מיוחד',
-  'מורה חינוך גופני',
-  'מורה עברית',
-  'מורה מוזיקה',
-  'מורה גיאוגרפיה',
-  'מורה ספרות',
-  'מורה/רכז מופת',
-  'מורה תנ"ך',
-  'מורה מתמטיקה',
-  'מורה מדע וטכנולוגיה',
-  'רכז/ת היסטוריה',
-  'רכז/ת חינוך מיוחד',
-  'סגן/ית מנהל/ת',
-  'קלינאי תקשורת',
-  'מורה אמנות חזותית',
-  'מורה אזרחות',
-  'מורה מדעי הסביבה',
-  'רכז/ת תנ"ך',
-  'מורה חינוך לשוני',
-  'רכז/ת פדגוגי',
-  'מדריך/ת מתמטיקה',
-  'מנהל/ת תיכון',
-  'רכז/ת אנגלית',
-  'מורה שילוב',
-  'מדריך/ת מדע וטכנולוגיה',
-  'רכז/ת ספרות',
-  'מדריך/ת עברית',
-  'רכז/ת מדעי המחשב',
-  'רכז/ת עברית',
-  'משרד החינוך',
-  'רכז/ת גיל רך',
-  'רכז/ת מחשבים',
-  'מורה כימיה',
-  'רכז/ת חברתי',
-  'רכז/ת ערבית',
-  'רכז/ת אזרחות',
-  'מדריך/ת ערבית',
-  'מדריך/ת אמנות',
-  'מורה תיאטרון',
-  'מורה פיזיקה',
-  'מורה ביולוגיה',
-  'מורה תושב"ע'
-  ];
-
-  // Function to calculate similarity between strings (for auto-correction)
-  const calculateSimilarity = (str1: string, str2: string): number => {
-    const longer = str1.length > str2.length ? str1 : str2;
-    const shorter = str1.length > str2.length ? str2 : str1;
-    const editDistance = getEditDistance(longer.toLowerCase(), shorter.toLowerCase());
-    return (longer.length - editDistance) / longer.length;
-  };
-
-  // Levenshtein distance algorithm for string similarity
-  const getEditDistance = (str1: string, str2: string): number => {
-    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
-    
-    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
-    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
-    
-    for (let j = 1; j <= str2.length; j++) {
-      for (let i = 1; i <= str1.length; i++) {
-        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        matrix[j][i] = Math.min(
-          matrix[j][i - 1] + 1,
-          matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + indicator
-        );
-      }
-    }
-    
-    return matrix[str2.length][str1.length];
-  };
   const normalize = (str: string) =>
   str
     .replace(/\/ת/g, '')   // מסיר "/ת"
@@ -215,8 +185,9 @@ const TeacherInfo: React.FC = () => {
 
   // Initialize filtered subjects on component mount
   useEffect(() => {
-    setFilteredSubjects(predefinedSubjects.slice(0, 10));
-  }, []);
+  setFilteredSubjects(predefinedSubjects.slice(0, 10));
+}, [predefinedSubjects]);
+
 
 
   return (

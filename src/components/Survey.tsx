@@ -141,55 +141,6 @@ const Survey: React.FC = () => {
     navigate('/login');
   };
 
-  const handleSkip = async () => {
-    setIsSubmitting(true);
-    // Get all session data from localStorage
-    const userName = localStorage.getItem('userName');
-    const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
-    const courseRatings = JSON.parse(localStorage.getItem('courseRatings') || '[]');
-    const sessionTime = localStorage.getItem('sessionTime');
-    const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
-
-    // Get current date and time
-    const now = new Date();
-    const sessionDate = now.toLocaleDateString('he-IL');
-    const sessionDateTime = now.toLocaleString('he-IL');
-
-    // Create session data without survey
-    const sessionData = {
-      sessionDate: sessionDate,
-      sessionTime: sessionTime || '00:00:00',
-      sessionDateTime: sessionDateTime,
-      timestamp: now,
-      userInfo: {
-        userName: userName,
-        teacherInfo: teacherInfo,
-        courseRatings: courseRatings
-      },
-      conversationHistory: chatHistory,
-      survey: {
-        skipped: true,
-        skippedAt: sessionDateTime
-      }
-    };
-
-    // Save to Firestore
-    await saveSessionToFirebase(sessionData);
-
-    // Clear user session data
-    localStorage.removeItem('userName');
-    localStorage.removeItem('teacherInfo');
-    localStorage.removeItem('courseRatings');
-    localStorage.removeItem('sessionTime');
-    localStorage.removeItem('chatHistory');
-
-    setIsSubmitting(false);
-
-    // Logout and redirect
-    await logout();
-    navigate('/login');
-  };
-
   const renderStars = (value: number, onChange: (val: number) => void) => {
     return (
       <div style={styles.starsContainer}>
