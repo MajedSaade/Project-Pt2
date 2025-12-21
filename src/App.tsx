@@ -12,22 +12,23 @@ import FirebaseTest from './components/FirebaseTest';
 
 function App() {
   useEffect(() => {
-    if (!sessionStorage.getItem('ml_warmed')) {
+    const interval = setInterval(() => {
       fetch("https://api-course-recommender.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          role: "warmup",
-          sector: "warmup",
-          language: "warmup",
+          role: "keepalive",
+          sector: "keepalive",
+          language: "keepalive",
           teaches_elementary: 0,
           teaches_secondary: 0
         })
       }).catch(() => {});
+    }, 7 * 60 * 1000); // 7 דקות
 
-      sessionStorage.setItem('ml_warmed', 'true');
-    }
+    return () => clearInterval(interval);
   }, []);
+
   return (
     <Router>
       <AuthProvider>

@@ -72,11 +72,7 @@ const Chat: React.FC = () => {
   }, []);
 
   const suggestedQuestions = [
-    'האם תוכל להמליץ על קורסים בנושא שפת אם - עברית?',
-    'אני מעוניין בקורסים בנושא למידה חברתית רגשית (SEL)',
-    'מה הקורסים המובילים בנושא אוריינות דיגיטלית?',
-    'אני מחפש קורסים בנושא תיאטרון לשיפור הוראתי',
-    'מה תוכל להמליץ לגדול מקצועי כמורה?'
+    'תמליץ לי'
   ];
 
   useEffect(() => {
@@ -545,7 +541,7 @@ const styles = {
     border: '2px solid #4169e1',
     borderRadius: '20px',
     padding: '4px 8px',
-    fontSize: '10px',
+    fontSize: '18px',
     fontWeight: 500,
     cursor: 'pointer',
     color: '#4169e1',

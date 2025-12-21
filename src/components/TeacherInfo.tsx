@@ -172,41 +172,39 @@ const TeacherInfo: React.FC = () => {
     
     return matrix[str2.length][str1.length];
   };
+  const normalize = (str: string) =>
+  str
+    .replace(/\/ת/g, '')   // מסיר "/ת"
+    .replace(/\//g, ' ')   // מחליף "/" ברווח
+    .replace(/\s+/g, ' ')  // מאחד רווחים
+    .trim();
+
+
 
   // Filter and sort subjects based on search term
   const filterSubjects = (searchTerm: string) => {
     if (!searchTerm.trim()) {
-      setFilteredSubjects(predefinedSubjects.slice(0, 10)); // Show first 10 subjects when empty
+      setFilteredSubjects(predefinedSubjects.slice(0, 10));
       return;
     }
 
-    const results = predefinedSubjects
-      .map(subject => ({
-        subject,
-        similarity: calculateSimilarity(searchTerm, subject),
-        exactMatch: subject.includes(searchTerm),
-        startsWith: subject.startsWith(searchTerm)
-      }))
-      .filter(item => item.similarity > 0.3 || item.exactMatch) // Threshold for similarity
-      .sort((a, b) => {
-        // Prioritize exact matches and starts with
-        if (a.exactMatch && !b.exactMatch) return -1;
-        if (!a.exactMatch && b.exactMatch) return 1;
-        if (a.startsWith && !b.startsWith) return -1;
-        if (!a.startsWith && b.startsWith) return 1;
-        return b.similarity - a.similarity;
-      })
-      .slice(0, 8) // Limit to 8 suggestions
-      .map(item => item.subject);
+    const normalizedSearch = normalize(searchTerm);
 
-    setFilteredSubjects(results);
+    const results = predefinedSubjects.filter(subject =>
+      normalize(subject).includes(normalizedSearch)
+    );
+    setFilteredSubjects(results.slice(0, 8));
+
   };
+
+
+
 
   const handleSubjectSearch = (value: string) => {
     setSubjectSearchTerm(value);
-    setTeacherData(prev => ({ ...prev, subjectArea: value }));
     filterSubjects(value);
     setShowSubjectDropdown(true);
+    setTeacherData(prev => ({ ...prev, subjectArea: '' }));
   };
 
   const handleSubjectSelect = (subject: string) => {
@@ -216,9 +214,10 @@ const TeacherInfo: React.FC = () => {
   };
 
   // Initialize filtered subjects on component mount
-  React.useEffect(() => {
-    filterSubjects('');
-  });
+  useEffect(() => {
+    setFilteredSubjects(predefinedSubjects.slice(0, 10));
+  }, []);
+
 
   return (
     <div style={styles.container} dir="rtl">

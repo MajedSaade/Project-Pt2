@@ -27,7 +27,7 @@ let lastBotMessage: string | undefined = undefined;
 function detectIntent(message: string): "question" | "request_recommendation" | "confirmation" | "other" {
   const msg = message.trim().toLowerCase();
 
-  const recommendationWords = ["מתעניין","מתעניין","מתעניינת","עוד", "תמליץ", "מחפש","מחפשת","המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
+  const recommendationWords = ["מתעניין","מתעניין","מתעניינת","עוד", "תמליץ לי", "תמליץ", "מחפש","מחפשת","המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
   const confirmationWords = ["אא", "כן", "בטח", "קדימה", "יאללה", "כן בבקשה"];
   const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסביר" , "תסבר", "מה", "למה"];
 

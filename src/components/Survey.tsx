@@ -316,14 +316,6 @@ const Survey: React.FC = () => {
             >
               {isSubmitting ? 'שולח...' : 'שלח ויציאה'}
             </button>
-            <button
-              type="button"
-              onClick={handleSkip}
-              style={styles.skipButton}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'שולח...' : 'דלג ויציאה'}
-            </button>
           </div>
         </form>
       </div>
