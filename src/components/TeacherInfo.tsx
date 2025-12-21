@@ -70,7 +70,10 @@ const TeacherInfo: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [subjectSearchTerm, setSubjectSearchTerm] = useState('');
   const [showSubjectDropdown, setShowSubjectDropdown] = useState(false);
-  const [filteredSubjects, setFilteredSubjects] = useState<string[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<string[]>(
+    predefinedSubjects.slice(0, 10)
+  );
+
 
   const navigate = useNavigate();
 
@@ -182,13 +185,6 @@ const TeacherInfo: React.FC = () => {
     setTeacherData(prev => ({ ...prev, subjectArea: subject }));
     setShowSubjectDropdown(false);
   };
-
-  // Initialize filtered subjects on component mount
-  useEffect(() => {
-  setFilteredSubjects(predefinedSubjects.slice(0, 10));
-}, [predefinedSubjects]);
-
-
 
   return (
     <div style={styles.container} dir="rtl">
