@@ -7,12 +7,6 @@ export interface User {
   createdAt: Date;
 }
 
-export interface UserProfile {
-  name: string;
-  email: string;
-  subjectInterests: string[];
-  gradeLevel: string;
-}
 
 export interface TeacherProfile {
   name: string;
@@ -20,7 +14,7 @@ export interface TeacherProfile {
   schoolType: string;
   language: string;
   educationLevels: string[];
-  previousCourses: string[];
+  previousCourses: { courseId: string; courseName: string; }[];
 }
 
 export interface ChatMessage {
@@ -32,8 +26,6 @@ export interface ChatMessage {
 
 export interface AuthContextType {
   currentUser: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, profile: UserProfile) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
   loginAnonymously: () => Promise<void>;

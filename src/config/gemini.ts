@@ -27,9 +27,9 @@ let lastBotMessage: string | undefined = undefined;
 function detectIntent(message: string): "question" | "request_recommendation" | "confirmation" | "other" {
   const msg = message.trim().toLowerCase();
 
-  const recommendationWords = ["מתעניין","מתעניין","מתעניינת","עוד", "תמליץ לי", "תמליץ", "מחפש","מחפשת","המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
+  const recommendationWords = ["מתעניין", "מתעניין", "מתעניינת", "עוד", "תמליץ לי", "תמליץ", "מחפש", "מחפשת", "המלצה", "קורס מתאים", "אני רוצה המלצה", "רוצה", "איזה קורס"];
   const confirmationWords = ["אא", "כן", "בטח", "קדימה", "יאללה", "כן בבקשה"];
-  const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסביר" , "תסבר", "מה", "למה"];
+  const questionWords = ["האם", "?", "מה זה", "איך", "איפה", "מתי", "כמה", "מי", "תסביר", "תסבר", "מה", "למה"];
 
   if (recommendationWords.some(w => msg.includes(w))) return "request_recommendation";
   if (confirmationWords.includes(msg)) return "confirmation";
@@ -63,7 +63,7 @@ export const generateCourseRecommendation = async (
     const intent = detectIntent(userMessage);
     const previousCoursesText =
       teacherProfile.previousCourses && teacherProfile.previousCourses.length > 0
-        ? teacherProfile.previousCourses.join(', ')
+        ? teacherProfile.previousCourses.map(c => typeof c === 'string' ? c : c.courseName).join(', ')
         : 'לא צוינו קורסים קודמים';
 
     console.log(`📍 Conversation State: ${conversationState}`);
@@ -89,7 +89,7 @@ export const generateCourseRecommendation = async (
     const predictionData = await predictionResponse.json();
 
     const coursesSummary = predictionData
-    .map((c: any, i: number) => `${i + 1} שם הקורס: ${c["שם הקורס"]}
+      .map((c: any, i: number) => `${i + 1} שם הקורס: ${c["שם הקורס"]}
 
       פרטי הקורס:
       • קטגוריה: ${c["קטגוריה"]}
@@ -106,7 +106,7 @@ export const generateCourseRecommendation = async (
 
       ציון התאמת הקורס למורה: ${(c.score * 100).toFixed(1)}%
       `)
-        .join("\n");
+      .join("\n");
 
 
     console.log("📘 Courses Summary for prompt:", coursesSummary);
@@ -157,7 +157,7 @@ export const generateCourseRecommendation = async (
     if (intent === "question") {
       conversationState = "awaitingRecommendationConfirmation";
 
-    const questionPrompt = `
+      const questionPrompt = `
      אתה עוזר חכם להמלצת קורסים למורים וכבר המלצת עכשיו המורה כתב:
       "${userMessage}"
 

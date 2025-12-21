@@ -5,10 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Welcome from './components/Welcome';
 import TeacherInfo from './components/TeacherInfo';
 import CourseSelection from './components/CourseSelection';
-import Register from './components/Register';
 import Chat from './components/Chat';
 import Survey from './components/Survey';
-import FirebaseTest from './components/FirebaseTest';
 
 function App() {
   useEffect(() => {
@@ -23,7 +21,7 @@ function App() {
           teaches_elementary: 0,
           teaches_secondary: 0
         })
-      }).catch(() => {});
+      }).catch(() => { });
     }, 7 * 60 * 1000); // 7 דקות
 
     return () => clearInterval(interval);
@@ -41,7 +39,6 @@ function App() {
             <Route path="/welcome" element={<Welcome />} />
             <Route path="/teacher-info" element={<TeacherInfo />} />
             <Route path="/course-selection" element={<CourseSelection />} />
-            <Route path="/register" element={<Register />} />
 
             {/* Protected routes */}
             <Route
@@ -57,14 +54,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Survey />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/firebase-test"
-              element={
-                <ProtectedRoute>
-                  <FirebaseTest />
                 </ProtectedRoute>
               }
             />

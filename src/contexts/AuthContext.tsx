@@ -1,15 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   signInAnonymously,
   User as FirebaseUser
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
-import { User, UserProfile, AuthContextType } from '../types/User';
+import { User, AuthContextType } from '../types/User';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -29,27 +27,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const register = async (email: string, password: string, profile: UserProfile) => {
-    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const firebaseUser = userCredential.user;
-
-    // Create user document in Firestore
-    const userData: User = {
-      uid: firebaseUser.uid,
-      name: profile.name,
-      email: profile.email,
-      subjectInterests: profile.subjectInterests,
-      gradeLevel: profile.gradeLevel,
-      createdAt: new Date()
-    };
-
-    await setDoc(doc(db, 'users', firebaseUser.uid), userData);
-    setCurrentUser(userData);
-  };
-
-  const login = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
-  };
 
   // Login anonymously
   const loginAnonymously = async () => {
@@ -109,8 +86,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     currentUser,
-    login,
-    register,
     logout,
     loading,
     loginAnonymously

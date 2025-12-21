@@ -21,7 +21,7 @@ const Chat: React.FC = () => {
   const [sessionTime, setSessionTime] = useState(0);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -113,7 +113,7 @@ const Chat: React.FC = () => {
       const userName = localStorage.getItem('userName') || 'User';
       const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
       const selectedCourses = JSON.parse(localStorage.getItem('selectedCourses') || '[]');
-      
+
       const teacherProfile: TeacherProfile = {
         name: userName,
         subjectArea: teacherInfo.subjectArea || teacherInfo.subjectAreas?.join(', ') || '',
@@ -208,6 +208,7 @@ const Chat: React.FC = () => {
                   <button
                     key={index}
                     style={styles.suggestedButton}
+                    className="suggested-button"
                     onClick={() => {
                       handleSuggestedQuestion(question);
                       setTimeout(() => {
@@ -530,32 +531,31 @@ const styles = {
     textAlign: 'right' as const
   },
   questionsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(80px, 1fr))',
-    gap: '6px',
-    alignItems: 'center',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
+    flexWrap: 'wrap' as const,
     width: '100%'
   },
   suggestedButton: {
-    backgroundColor: '#dfe7f5',
+    background: 'linear-gradient(135deg, #f0f4ff 0%, #dfe7f5 100%)',
     border: '2px solid #4169e1',
-    borderRadius: '20px',
-    padding: '4px 8px',
-    fontSize: '18px',
-    fontWeight: 500,
+    borderRadius: '25px',
+    padding: '8px 24px',
+    fontSize: '16px',
+    fontWeight: 600,
     cursor: 'pointer',
     color: '#4169e1',
     textAlign: 'center' as const,
     direction: 'rtl' as const,
-    transition: 'all 0.2s ease',
-    whiteSpace: 'normal' as const,
-    overflow: 'visible' as const,
-    textOverflow: 'clip' as const,
-    lineHeight: '1.2',
-    minHeight: '28px',
-    display: 'flex' as const,
+    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    whiteSpace: 'nowrap' as const,
+    boxShadow: '0 2px 10px rgba(65, 105, 225, 0.1)',
+    display: 'inline-flex' as const,
     alignItems: 'center' as const,
-    justifyContent: 'center' as const
+    justifyContent: 'center' as const,
+    gap: '8px',
+    minWidth: '120px'
   }
 };
 
@@ -573,11 +573,11 @@ const messageFadeIn = `
 
 @media (hover: hover) {
   .suggested-button:hover {
-    background-color: #7a35d5;
-    color: white;
-    border-color: #7a35d5;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(122, 53, 213, 0.3);
+    background: linear-gradient(135deg, #4169e1 0%, #2b4acb 100%) !important;
+    color: white !important;
+    border-color: #2b4acb !important;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(65, 105, 225, 0.3) !important;
   }
 }
 `;

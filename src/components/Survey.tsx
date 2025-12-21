@@ -12,6 +12,7 @@ interface SurveyAnswers {
   accuracy: number;
   easeOfUse: number;
   wouldRecommend: string;
+  generalFeedback: string;
 }
 
 const Survey: React.FC = () => {
@@ -23,7 +24,8 @@ const Survey: React.FC = () => {
     helpfulness: 0,
     accuracy: 0,
     easeOfUse: 0,
-    wouldRecommend: ''
+    wouldRecommend: '',
+    generalFeedback: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,7 +82,7 @@ const Survey: React.FC = () => {
     // Get all session data from localStorage
     const userName = localStorage.getItem('userName');
     const teacherInfo = JSON.parse(localStorage.getItem('teacherInfo') || '{}');
-    const courseRatings = JSON.parse(localStorage.getItem('courseRatings') || '[]');
+    const selectedCourses = JSON.parse(localStorage.getItem('selectedCourses') || '[]');
     const sessionTime = localStorage.getItem('sessionTime');
     const chatHistory = JSON.parse(localStorage.getItem('chatHistory') || '[]');
 
@@ -98,7 +100,7 @@ const Survey: React.FC = () => {
       userInfo: {
         userName: userName,
         teacherInfo: teacherInfo,
-        courseRatings: courseRatings
+        selectedCourses: selectedCourses
       },
       conversationHistory: chatHistory,
       survey: {
@@ -130,7 +132,7 @@ const Survey: React.FC = () => {
     // Clear user session data
     localStorage.removeItem('userName');
     localStorage.removeItem('teacherInfo');
-    localStorage.removeItem('courseRatings');
+    localStorage.removeItem('selectedCourses');
     localStorage.removeItem('sessionTime');
     localStorage.removeItem('chatHistory');
 
@@ -138,7 +140,7 @@ const Survey: React.FC = () => {
 
     // Logout and redirect
     await logout();
-    navigate('/login');
+    navigate('/welcome');
   };
 
   const renderStars = (value: number, onChange: (val: number) => void) => {
@@ -200,7 +202,7 @@ const Survey: React.FC = () => {
 
           {/* Question 4: Accuracy */}
           <div style={styles.question}>
-            <label style={styles.label}>4. עד כמה המידע שהצ'אט סיפק היה מדויק בעיניך?</label>
+            <label style={styles.label}>4. עד כמה ההסבר על הקורסים היה מועיל וברור?</label>
             {renderStars(answers.accuracy, (val) =>
               setAnswers({ ...answers, accuracy: val })
             )}
@@ -252,6 +254,17 @@ const Survey: React.FC = () => {
                 לא
               </label>
             </div>
+          </div>
+
+          {/* Question 6: General Feedback */}
+          <div style={styles.question}>
+            <label style={styles.label}>משוב כללי על השימוש במערכת המלצות המורים:</label>
+            <textarea
+              value={answers.generalFeedback}
+              onChange={(e) => setAnswers({ ...answers, generalFeedback: e.target.value })}
+              placeholder="כתבו כאן את המשוב שלכם..."
+              style={styles.textarea}
+            />
           </div>
 
           {/* Buttons */}
@@ -393,6 +406,21 @@ const styles = {
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.3s ease'
+  },
+  textarea: {
+    width: '100%',
+    minHeight: '100px',
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #ddd',
+    fontSize: '14px',
+    fontFamily: 'inherit',
+    resize: 'vertical' as const,
+    marginTop: '8px',
+    backgroundColor: 'white',
+    color: '#333',
+    direction: 'rtl' as const,
+    textAlign: 'right' as const
   }
 };
 
