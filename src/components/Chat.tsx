@@ -200,31 +200,7 @@ const Chat: React.FC = () => {
 
       <div style={styles.chatContainer}>
         <div style={styles.messagesContainer}>
-          {/* Suggested questions - show only after welcome message and no other messages */}
-          {messages.length === 1 && !loading && (
-            <div style={styles.suggestedQuestionsContainer}>
-              <div style={styles.questionsGrid}>
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    style={styles.suggestedButton}
-                    className="suggested-button"
-                    onClick={() => {
-                      handleSuggestedQuestion(question);
-                      setTimeout(() => {
-                        const form = document.querySelector('form');
-                        if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
-                      }, 100);
-                    }}
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {messages.map((message) => (
+          {messages.map((message, index) => (
             <div
               key={message.id}
               style={{
@@ -249,7 +225,25 @@ const Chat: React.FC = () => {
                   alignSelf: message.isUser ? 'flex-end' : 'flex-start'
                 }}
               >
-                <div style={styles.messageContent}>{message.content}</div>
+                <div style={styles.messageContent}>
+                  {message.content}
+                  {!message.isUser && index === 0 && messages.length === 1 && (
+                    <div style={styles.inlineButtonContainer}>
+                      <button
+                        style={styles.inlineSuggestedButton}
+                        onClick={() => {
+                          handleSuggestedQuestion('תמליץ לי');
+                          setTimeout(() => {
+                            const form = document.querySelector('form');
+                            if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+                          }, 100);
+                        }}
+                      >
+                        תמליץ לי
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <div style={styles.timestamp}>
                   {message.timestamp.toLocaleTimeString([], {
                     hour: '2-digit',
@@ -448,7 +442,28 @@ const styles = {
     lineHeight: '1.4',
     whiteSpace: 'pre-wrap' as const,
     direction: 'rtl' as const,
-    textAlign: 'right' as const
+    textAlign: 'right' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '12px'
+  },
+  inlineButtonContainer: {
+    display: 'flex',
+    justifyContent: 'flex-start',
+    marginTop: '4px'
+  },
+  inlineSuggestedButton: {
+    background: 'white',
+    border: '1.5px solid #7a35d5',
+    borderRadius: '12px',
+    padding: '6px 16px',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    color: '#7a35d5',
+    textAlign: 'center' as const,
+    transition: 'all 0.2s ease',
+    boxShadow: '0 2px 5px rgba(122, 53, 213, 0.1)',
   },
   timestamp: {
     fontSize: '11px',
@@ -520,42 +535,6 @@ const styles = {
     border: '2px solid #7a35d5',
     boxShadow: '0 2px 8px rgba(122, 53, 213, 0.25)',
     flexShrink: 0
-  },
-  suggestedQuestionsContainer: {
-    width: '100%',
-    padding: '12px',
-    backgroundColor: 'transparent',
-    borderRadius: '8px',
-    marginBottom: '16px',
-    direction: 'rtl' as const,
-    textAlign: 'right' as const
-  },
-  questionsGrid: {
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '12px',
-    flexWrap: 'wrap' as const,
-    width: '100%'
-  },
-  suggestedButton: {
-    background: 'linear-gradient(135deg, #f0f4ff 0%, #dfe7f5 100%)',
-    border: '2px solid #4169e1',
-    borderRadius: '25px',
-    padding: '8px 24px',
-    fontSize: '16px',
-    fontWeight: 600,
-    cursor: 'pointer',
-    color: '#4169e1',
-    textAlign: 'center' as const,
-    direction: 'rtl' as const,
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-    whiteSpace: 'nowrap' as const,
-    boxShadow: '0 2px 10px rgba(65, 105, 225, 0.1)',
-    display: 'inline-flex' as const,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    gap: '8px',
-    minWidth: '120px'
   }
 };
 
@@ -563,7 +542,8 @@ const typingKeyframes = `
 @keyframes typingBounce {
   0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
   40% { transform: scale(1.2); opacity: 1; }
-}`;
+}
+`;
 
 const messageFadeIn = `
 @keyframes fadeIn {
@@ -572,12 +552,8 @@ const messageFadeIn = `
 }
 
 @media (hover: hover) {
-  .suggested-button:hover {
-    background: linear-gradient(135deg, #4169e1 0%, #2b4acb 100%) !important;
-    color: white !important;
-    border-color: #2b4acb !important;
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(65, 105, 225, 0.3) !important;
+  button:hover {
+    filter: brightness(0.95);
   }
 }
 `;
@@ -590,7 +566,7 @@ if (typeof document !== 'undefined' && !document.getElementById('typing-keyframe
 }
 
 if (typeof document !== 'undefined' && !document.getElementById('fade-in-keyframes')) {
-  const style2 = document.createElement('style');
+  const style2 = document.createElement('style2');
   style2.id = 'fade-in-keyframes';
   style2.innerHTML = messageFadeIn;
   document.head.appendChild(style2);
