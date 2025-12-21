@@ -71,9 +71,6 @@ const Chat: React.FC = () => {
     };
   }, []);
 
-  const suggestedQuestions = [
-    'תמליץ לי'
-  ];
 
   useEffect(() => {
     // Welcome message when component mounts
