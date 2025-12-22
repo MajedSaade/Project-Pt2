@@ -55,7 +55,7 @@ const Survey: React.FC = () => {
       if (currentUser) {
         const chatData = JSON.stringify(data, null, 2);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `sessions/${currentUser.uid}/session_${timestamp}.json`;
+        const fileName = `sessions/session_${currentUser.name}_${timestamp}.json`;
         const storageRef = ref(storage, fileName);
 
         await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
@@ -115,18 +115,7 @@ const Survey: React.FC = () => {
     if (success) {
       alert('השאלון והשיחה נשמרו בהצלחה!');
     } else {
-      alert('שגיאה בשמירת הנתונים. מוריד עותק מקומי...');
-      // Fallback: Download the file locally
-      const jsonData = JSON.stringify(sessionData, null, 2);
-      const blob = new Blob([jsonData], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `session_${userName}_${now.getTime()}.json`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      alert('שגיאה בשמירת הנתונים. אנא נסה שוב מאוחר יותר.');
     }
 
     // Clear user session data

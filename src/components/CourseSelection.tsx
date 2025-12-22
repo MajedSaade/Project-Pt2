@@ -276,7 +276,7 @@ const CourseSelection: React.FC = () => {
                         <span style={styles.courseName}>{course.name}</span>
                         {isSelected && (
                           <div style={styles.checkBadge}>
-                            ✅ נבחר
+                             נבחר
                           </div>
                         )}
                       </div>
