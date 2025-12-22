@@ -55,7 +55,7 @@ const Survey: React.FC = () => {
       if (currentUser) {
         const chatData = JSON.stringify(data, null, 2);
         const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `sessions/session_${currentUser.name}_${timestamp}.json`;
+        const fileName = `sessions/${currentUser.uid}/session_${timestamp}.json`;
         const storageRef = ref(storage, fileName);
 
         await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
