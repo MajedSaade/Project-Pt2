@@ -229,14 +229,14 @@ const Chat: React.FC = () => {
                       <button
                         style={styles.inlineSuggestedButton}
                         onClick={() => {
-                          handleSuggestedQuestion('תמליץ לי');
+                          handleSuggestedQuestion('תמליץ לי על קורסים');
                           setTimeout(() => {
                             const form = document.querySelector('form');
                             if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
                           }, 100);
                         }}
                       >
-                        תמליץ לי
+                       תמליץ לי על קורסים
                       </button>
                     </div>
                   )}

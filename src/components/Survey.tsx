@@ -8,8 +8,8 @@ import { ref, uploadString } from 'firebase/storage';
 interface SurveyAnswers {
   overallExperience: number;
   responseQuality: number;
-  helpfulness: number;
   accuracy: number;
+  clarity: number;
   easeOfUse: number;
   wouldRecommend: string;
   generalFeedback: string;
@@ -21,8 +21,8 @@ const Survey: React.FC = () => {
   const [answers, setAnswers] = useState<SurveyAnswers>({
     overallExperience: 0,
     responseQuality: 0,
-    helpfulness: 0,
     accuracy: 0,
+    clarity: 0,
     easeOfUse: 0,
     wouldRecommend: '',
     generalFeedback: ''
@@ -33,8 +33,8 @@ const Survey: React.FC = () => {
     return (
       answers.overallExperience > 0 &&
       answers.responseQuality > 0 &&
-      answers.helpfulness > 0 &&
       answers.accuracy > 0 &&
+      answers.clarity > 0 &&
       answers.easeOfUse > 0 &&
       answers.wouldRecommend !== ''
     );
@@ -173,27 +173,27 @@ const Survey: React.FC = () => {
             )}
           </div>
 
-          {/* Question 2: Helpfulness */}
+          {/* Question 2: Recommendations quality */}
           <div style={styles.question}>
-            <label style={styles.label}>2. עד כמה היית מרוצה מאיכות התשובות של הצ'אט?</label>
+            <label style={styles.label}>2. עד כמה היית מרוצה מההמלצות של הצ'אט?</label>
             {renderStars(answers.responseQuality, (val) =>
               setAnswers({ ...answers, responseQuality: val })
             )}
           </div>
 
-          {/* Question 3: Ease of Use */}
+          {/* Question 3: Accuracy */}
           <div style={styles.question}>
-            <label style={styles.label}>3. עד כמה התשובות עזרו לך להבין או לפתור את מה שחיפשת?</label>
-            {renderStars(answers.helpfulness, (val) =>
-              setAnswers({ ...answers, helpfulness: val })
+            <label style={styles.label}>3. עד כמה ההסברים שסופקו לך היו מועילים?</label>
+            {renderStars(answers.accuracy, (val) =>
+              setAnswers({ ...answers, accuracy: val })
             )}
           </div>
 
-          {/* Question 4: Accuracy */}
+          {/* Question 4: Clarity */}
           <div style={styles.question}>
-            <label style={styles.label}>4. עד כמה ההסבר על הקורסים היה מועיל וברור?</label>
-            {renderStars(answers.accuracy, (val) =>
-              setAnswers({ ...answers, accuracy: val })
+            <label style={styles.label}>4. עד כמה ההסברים שסופקו לך היו ברורים?</label>
+            {renderStars(answers.clarity, (val) =>
+              setAnswers({ ...answers, clarity: val })
             )}
           </div>
 
