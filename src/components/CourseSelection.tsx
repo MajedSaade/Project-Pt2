@@ -442,34 +442,46 @@ const styles = {
 
   buttonContainer: {
     display: 'flex',
-    gap: '16px',
+    gap: 'clamp(12px, 3vw, 16px)',
     justifyContent: 'center',
-    marginTop: '24px'
+    alignItems: 'center',
+    marginTop: '24px',
+    flexWrap: 'wrap' as const
   },
 
   skipButton: {
-    padding: '12px 24px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(16px, 4vw, 24px)',
     backgroundColor: '#6c757d',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '16px',
+    fontSize: 'clamp(14px, 4vw, 16px)',
     fontWeight: 600,
     cursor: 'pointer',
-    transition: 'all 0.3s ease'
+    transition: 'all 0.3s ease',
+    minHeight: '44px',
+    minWidth: '100px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   submitButton: {
-    padding: '12px 24px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(16px, 4vw, 24px)',
     background: 'linear-gradient(to right, #7a35d5, #b84ef1)',
     color: '#fff',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '16px',
+    fontSize: 'clamp(14px, 4vw, 16px)',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: '0 4px 15px rgba(106, 17, 203, 0.3)'
+    boxShadow: '0 4px 15px rgba(106, 17, 203, 0.3)',
+    minHeight: '44px',
+    minWidth: '100px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   topControls: {
@@ -545,7 +557,10 @@ const styles = {
     transition: 'all 0.3s ease',
     whiteSpace: 'nowrap' as const,
     minWidth: '140px',
-    height: '52px'
+    height: '52px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   topContinueButton: {
@@ -561,7 +576,10 @@ const styles = {
     boxShadow: '0 6px 20px rgba(106, 17, 203, 0.35)',
     whiteSpace: 'nowrap' as const,
     minWidth: '160px',
-    height: '52px'
+    height: '52px',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
 
   noResults: {

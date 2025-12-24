@@ -302,46 +302,46 @@ const styles = {
   container: {
     display: 'flex',
     flexDirection: 'column' as const,
-    height: '100vh',
+    height: '100dvh',
     fontFamily: "'Inter', 'Noto Sans Hebrew', Arial, sans-serif",
     overflow: 'hidden',
-    direction: 'rtl' as const
+    direction: 'rtl' as const,
+    backgroundColor: '#f5f5f5'
   },
   header: {
-    position: 'fixed' as 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 10,
+    position: 'relative' as const,
     backgroundImage: 'linear-gradient(to right, #7a35d5, #9d5ddf)',
-    backgroundColor: '#7a35d5', // optional fallback color
+    backgroundColor: '#7a35d5',
     color: 'white',
-    padding: '24px 32px',
-    borderBottomLeftRadius: '16px',
-    borderBottomRightRadius: '16px',
+    padding: 'clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px)',
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    flexShrink: 0,
+    gap: '16px',
+    flexWrap: 'wrap' as const
   },
   userInfo: {
     flex: 1
   },
   title: {
     margin: 0,
-    fontSize: '24px',
+    fontSize: 'clamp(18px, 5vw, 24px)',
     fontWeight: 600
   },
   userDetails: {
     margin: '8px 0 0 0',
-    fontSize: '15px',
+    fontSize: 'clamp(13px, 3vw, 15px)',
     fontWeight: 500,
     opacity: 0.85
   },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: '20px'
+    gap: 'clamp(12px, 2vw, 20px)',
+    flexWrap: 'wrap' as const,
+    justifyContent: 'center'
   },
   timerContainer: {
     display: 'flex',
@@ -355,14 +355,14 @@ const styles = {
     direction: 'rtl' as const
   },
   timerLabel: {
-    fontSize: '14px',
+    fontSize: 'clamp(12px, 3vw, 14px)',
     fontWeight: 500,
     opacity: 0.9,
     direction: 'rtl' as const,
     textAlign: 'right' as const
   },
   timerValue: {
-    fontSize: '18px',
+    fontSize: 'clamp(14px, 3vw, 18px)',
     fontWeight: 700,
     fontFamily: 'monospace',
     letterSpacing: '1px',
@@ -372,9 +372,9 @@ const styles = {
     backgroundImage: 'linear-gradient(to right, #4169e1)',
     color: 'white',
     border: 'none',
-    padding: '12px 24px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
     borderRadius: '10px',
-    fontSize: '15px',
+    fontSize: 'clamp(13px, 3vw, 15px)',
     fontWeight: 600,
     cursor: 'pointer',
     display: 'flex',
@@ -382,6 +382,7 @@ const styles = {
     gap: '8px',
     transition: 'all 0.2s ease-in-out',
     boxShadow: '0 2px 6px rgba(65, 105, 225, 0.2)',
+    minHeight: '40px'
   },
   saveButton: {
     backgroundImage: 'linear-gradient(to right, #28a745)',
@@ -408,18 +409,16 @@ const styles = {
     backgroundPosition: 'center',
     backgroundAttachment: 'fixed',
     backdropFilter: 'blur(2px)',
-    paddingTop: '120px',
-    paddingBottom: '100px',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    position: 'relative' as const
   },
   messagesContainer: {
     flex: 1,
     overflowY: 'auto' as const,
-    padding: '20px',
+    padding: 'clamp(12px, 3vw, 20px)',
     display: 'flex',
     flexDirection: 'column' as const,
-    gap: '10px',
-    height: 'calc(100vh - 220px)'
+    gap: '10px'
   },
   messageWrapper: {
     display: 'flex',
@@ -428,14 +427,14 @@ const styles = {
   },
   message: {
     maxWidth: '75%',
-    padding: '14px 18px',
+    padding: 'clamp(10px, 2vw, 14px) clamp(12px, 2vw, 18px)',
     borderRadius: '20px',
     wordWrap: 'break-word' as const,
     boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
     transition: 'transform 0.2s ease'
   },
   messageContent: {
-    fontSize: '14px',
+    fontSize: 'clamp(13px, 3vw, 14px)',
     lineHeight: '1.4',
     whiteSpace: 'pre-wrap' as const,
     direction: 'rtl' as const,
@@ -453,8 +452,8 @@ const styles = {
     background: 'white',
     border: '1.5px solid #7a35d5',
     borderRadius: '12px',
-    padding: '6px 16px',
-    fontSize: '13px',
+    padding: 'clamp(4px, 1vw, 6px) clamp(12px, 2vw, 16px)',
+    fontSize: 'clamp(12px, 2vw, 13px)',
     fontWeight: 600,
     cursor: 'pointer',
     color: '#7a35d5',
@@ -488,41 +487,46 @@ const styles = {
     animationDelay: '0.4s',
   },
   inputForm: {
-    position: 'fixed' as const,
-    bottom: 0,
-    left: 0,
-    right: 0,
+    position: 'relative' as const,
     display: 'flex',
-    padding: '20px',
+    padding: 'clamp(12px, 2vw, 20px)',
     backgroundColor: 'white',
-    borderTop: '1px solid #e9ecef',
-    boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.05)',
-    zIndex: 10
+    borderTop: '2px solid #e9ecef',
+    boxShadow: '0 -4px 12px rgba(0, 0, 0, 0.08)',
+    gap: 'clamp(10px, 2vw, 12px)',
+    flexShrink: 0,
+    flexWrap: 'wrap' as const
   },
   input: {
     flex: 1,
-    padding: '14px 18px',
+    padding: 'clamp(10px, 2vw, 14px) clamp(12px, 2vw, 18px)',
     border: '1px solid #ccc',
     borderRadius: '999px',
-    fontSize: '15px',
+    fontSize: 'clamp(13px, 3vw, 15px)',
     outline: 'none',
-    marginLeft: '12px',
     boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
     transition: 'border-color 0.2s ease',
     direction: 'rtl' as const,
-    textAlign: 'right' as const
+    textAlign: 'right' as const,
+    minHeight: '40px',
+    minWidth: '150px'
   },
   sendButton: {
     backgroundImage: 'linear-gradient(to right, #4169e1, #6495ed)',
     color: 'white',
     border: 'none',
-    padding: '12px 24px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(16px, 3vw, 24px)',
     borderRadius: '999px',
     cursor: 'pointer',
-    fontSize: '15px',
+    fontSize: 'clamp(13px, 3vw, 15px)',
     fontWeight: 600,
     transition: 'all 0.3s ease-in-out',
     boxShadow: '0 4px 10px rgba(65, 105, 225, 0.25)',
+    minHeight: '40px',
+    whiteSpace: 'nowrap' as const,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   avatar: {
     width: '40px',

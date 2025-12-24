@@ -91,7 +91,7 @@ const styles = {
 
   formContainer: {
     backgroundColor: 'white',
-    padding: '48px 32px',
+    padding: 'clamp(24px, 5vw, 48px) clamp(20px, 4vw, 32px)',
     borderRadius: '16px',
     boxShadow: '0 12px 30px rgba(0, 0, 0, 0.1)',
     width: '100%',
@@ -107,8 +107,8 @@ const styles = {
   },
 
   avatar: {
-    width: '150px',
-    height: '150px',
+    width: 'clamp(120px, 25vw, 150px)',
+    height: 'clamp(120px, 25vw, 150px)',
     borderRadius: '50%',
     objectFit: 'cover' as const,
     border: '3px solid #7a35d5',
@@ -118,7 +118,7 @@ const styles = {
   title: {
     marginBottom: '16px',
     color: '#1f1f1f',
-    fontSize: '36px',
+    fontSize: 'clamp(28px, 8vw, 36px)',
     fontWeight: 700,
     background: 'linear-gradient(to right, #7a35d5, #b84ef1)',
     WebkitBackgroundClip: 'text',
@@ -130,7 +130,7 @@ const styles = {
   subtitle: {
     marginBottom: '32px',
     color: '#555',
-    fontSize: '16px',
+    fontSize: 'clamp(14px, 4vw, 16px)',
     fontWeight: 400,
     lineHeight: '1.5',
     fontFamily: '"Inter", "Noto Sans Hebrew", Arial, sans-serif'
@@ -158,7 +158,7 @@ const styles = {
 
   input: {
     width: '100%',
-    padding: '16px',
+    padding: 'clamp(12px, 3vw, 16px)',
     border: '2px solid #e0e0e0',
     borderRadius: '12px',
     fontSize: '16px',
@@ -175,16 +175,17 @@ const styles = {
     width: '100%',
     background: 'linear-gradient(to right, #7a35d5, #b84ef1)',
     color: '#fff',
-    padding: '16px',
+    padding: 'clamp(12px, 3vw, 16px)',
     border: 'none',
     borderRadius: '12px',
-    fontSize: '16px',
+    fontSize: 'clamp(14px, 4vw, 16px)',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(106, 17, 203, 0.3)',
     transform: 'translateY(0)',
-    fontFamily: '"Inter", "Noto Sans Hebrew", Arial, sans-serif'
+    fontFamily: '"Inter", "Noto Sans Hebrew", Arial, sans-serif',
+    minHeight: '44px'
   }
 };
 

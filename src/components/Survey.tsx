@@ -281,19 +281,20 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: '100dvh',
+    height: '100dvh',
     background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    padding: '20px',
+    padding: 'clamp(12px, 4vw, 20px)',
     direction: 'rtl' as const
   },
   surveyCard: {
     backgroundColor: 'white',
     borderRadius: '20px',
-    padding: '40px',
+    padding: 'clamp(24px, 4vw, 40px)',
     maxWidth: '700px',
     width: '100%',
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1)',
-    maxHeight: '85vh',
+    maxHeight: '85dvh',
     overflowY: 'auto' as const
   },
   title: {

@@ -311,7 +311,7 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    minHeight: '100vh',
+    minHeight: '100dvh',
     backgroundImage: `url(${backgroundImage})`,
     backgroundSize: 'cover',
     backgroundPosition: 'center',
@@ -323,20 +323,20 @@ const styles = {
 
   formContainer: {
     backgroundColor: 'white',
-    padding: '40px 32px',
+    padding: 'clamp(24px, 5vw, 40px) clamp(20px, 4vw, 32px)',
     borderRadius: '16px',
     boxShadow: '0 12px 30px rgba(0, 0, 0, 0.1)',
     width: '100%',
     maxWidth: '600px',
     direction: 'rtl' as const,
-    maxHeight: '90vh',
+    maxHeight: '90dvh',
     overflowY: 'auto' as const
   },
 
   title: {
     marginBottom: '16px',
     color: '#1f1f1f',
-    fontSize: '32px',
+    fontSize: 'clamp(24px, 8vw, 32px)',
     fontWeight: 700,
     background: 'linear-gradient(to right, #7a35d5, #b84ef1)',
     WebkitBackgroundClip: 'text',
@@ -348,7 +348,7 @@ const styles = {
   subtitle: {
     marginBottom: '32px',
     color: '#555',
-    fontSize: '16px',
+    fontSize: 'clamp(13px, 4vw, 16px)',
     fontWeight: 400,
     lineHeight: '1.5',
     textAlign: 'center' as const
@@ -374,7 +374,7 @@ const styles = {
 
   input: {
     width: '100%',
-    padding: '12px 16px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(12px, 2vw, 16px)',
     border: '2px solid #e0e0e0',
     borderRadius: '8px',
     fontSize: '16px',
@@ -387,7 +387,7 @@ const styles = {
 
   select: {
     width: '100%',
-    padding: '12px 16px',
+    padding: 'clamp(10px, 2vw, 12px) clamp(12px, 2vw, 16px)',
     border: '2px solid #e0e0e0',
     borderRadius: '8px',
     fontSize: '16px',
@@ -415,15 +415,16 @@ const styles = {
     width: '100%',
     background: 'linear-gradient(to right, #7a35d5, #b84ef1)',
     color: '#fff',
-    padding: '16px',
+    padding: 'clamp(12px, 3vw, 16px)',
     border: 'none',
     borderRadius: '12px',
-    fontSize: '18px',
+    fontSize: 'clamp(14px, 4vw, 18px)',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     boxShadow: '0 4px 15px rgba(106, 17, 203, 0.3)',
-    marginTop: '16px'
+    marginTop: '16px',
+    minHeight: '44px'
   },
 
   searchContainer: {
