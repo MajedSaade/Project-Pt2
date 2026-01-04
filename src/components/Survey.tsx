@@ -51,16 +51,25 @@ const Survey: React.FC = () => {
       const docRef = await addDoc(collection(db, 'sessions'), data);
       console.log('✅ Document written to Firestore with ID: ', docRef.id);
 
-      // Also save to Firebase Storage as JSON file
-      if (currentUser) {
-        const chatData = JSON.stringify(data, null, 2);
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        const fileName = `sessions/${currentUser.uid}/session_${timestamp}.json`;
-        const storageRef = ref(storage, fileName);
+  // Also save to Firebase Storage as JSON file (grouped by date folder, then userId)
+  const uid = currentUser?.uid;
+    if (!uid) {
+      console.warn("No authenticated user - skipping Storage upload");
+      return true; // or return false if you want to fail
+    }
 
-        await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
-        console.log('✅ Session JSON saved to Storage: ', fileName);
-      }
+  const chatData = JSON.stringify(data, null, 2);
+  const sessionDate = data?.timestamp ? new Date(data.timestamp) : new Date();
+  const timestamp = sessionDate.toISOString().replace(/[:.]/g, '-');
+  const sessionDateFolder = sessionDate.toISOString().split('T')[0];
+
+  // ✅ This is the important line:
+  const fileName = `sessions/sessions_${sessionDateFolder}/${uid}/session_${timestamp}.json`;
+
+  const storageRef = ref(storage, fileName);
+  await uploadString(storageRef, chatData, 'raw', { contentType: 'application/json' });
+  console.log('✅ Session JSON saved to Storage: ', fileName);
+
 
       return true;
     } catch (e) {
